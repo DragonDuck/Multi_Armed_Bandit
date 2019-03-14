@@ -11,7 +11,8 @@ class Bandit(object):
         self._params = kwargs
 
     def get_value(self):
-        return np.random.normal(loc=self._params["loc"], scale=self._params["scale"], size=1)[0]
+        return np.random.exponential(scale=self._params["scale"], size=1)[0]
+        # return np.random.normal(loc=self._params["loc"], scale=self._params["scale"], size=1)[0]
 
     def get_param(self, key):
         return self._params[key]
@@ -24,16 +25,18 @@ class MultiArmedBandit(object):
 
         Each bandit is stored as a set of parameters
 
-        Each bandit has a normally distributed reward function.
-        Parameters (mu, sigma) are selected from an exponential distribution
+        Each bandit has an exponentially distributed reward function.
+        Parameters are selected from an exponential distribution
         :param n:
         """
         # Generate random bandits
         self._bandits = []
         for ii in range(n):
-            mu = np.random.exponential(scale=1, size=1)[0]
-            sigma = np.random.exponential(scale=0.5, size=1)[0]
-            self._bandits.append(Bandit(loc=mu, scale=sigma))
+            # mu = np.random.exponential(scale=1, size=1)[0]
+            # sigma = np.random.exponential(scale=0.5, size=1)[0]
+            # self._bandits.append(Bandit(loc=mu, scale=sigma))
+            scale = np.random.exponential(scale=1, size=1)[0]
+            self._bandits.append(Bandit(scale=scale))
 
     def get_bandits(self):
         return self._bandits

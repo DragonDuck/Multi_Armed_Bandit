@@ -6,6 +6,7 @@ class Player(object):
         """
         Create a player bot who implements an action strategy
         """
+        self._total_earnings = 0
         self._bandits = bandits
 
         # Initialize empty action values for each bandit
@@ -35,6 +36,7 @@ class Player(object):
 
         # Get reward
         reward = self._bandits.choose(n=action)
+        self._total_earnings += reward
 
         # Update action values and counts
         self._action_values[action] = self.update_action_value(action=action, reward=reward)
@@ -99,3 +101,6 @@ class Player(object):
 
     def get_action_values(self):
         return self._action_values
+
+    def get_total_earnings(self):
+        return self._total_earnings
