@@ -2,27 +2,41 @@ import random
 
 
 class Player(object):
-    def __init__(self, bandits, action_selector="greedy", exploration_epsilon=0.1):
+    def __init__(
+            self, bandits, action_selector="exploratory", exploration_epsilon=0,
+            action_values=None):
         """
         Create a player bot who implements an action strategy
+        :param bandits:
+        :param action_selector:
+        :param exploration_epsilon: The degree of exploration, between 0 (never explores) and 1 (always explores). Note
+               that "explore" means to choose an action that explicitly ISN'T the one with the highest estimated action
+               value.
+        :param action_values: By default, the initial action values will be 0. This parameter can either be a single
+               number, which assigns the same initial value to all actions, or it can be a list-like with as many
+               elements as there are bandits, which assigns initial action values element-wise.
         """
-        self._total_earnings = 0
+        self._earnings = []
         self._bandits = bandits
 
         # Initialize empty action values for each bandit
-        self._action_values = [0] * len(bandits.get_bandits())
+        if action_values is None:
+            self._action_values = [0.] * len(bandits.get_bandits())
+        elif hasattr(action_values, "__len__"):
+            self._action_values = [float(val) for ii, val in enumerate(action_values)]
+        else:
+            self._action_values = [float(action_values)] * len(bandits.get_bandits())
 
         # Record how often each action was performed
         self._action_k = [0] * len(bandits.get_bandits())
 
         # Set the action selector
-        if action_selector == "greedy":
-            self._select_action = self.select_greedy_optimal_action
-        elif action_selector == "exploratory":
-            self._select_action = self.select_greedy_optimal_action_with_randomness
+        if action_selector == "exploratory":
+            self._select_action = self.select_greedy_optimal_action_with_exploration
         else:
-            self._select_action = self.select_greedy_optimal_action
-            print("WARNING: Action selection algorithm '{}' not found. Using greedy selection".format(action_selector))
+            self._select_action = self.select_greedy_optimal_action_with_exploration
+            print("WARNING: Action selection algorithm '{}' not found. Using exploratory selection".format(
+                action_selector))
 
         # Various other parameters
         self._exploration_epsilon = exploration_epsilon
@@ -36,7 +50,7 @@ class Player(object):
 
         # Get reward
         reward = self._bandits.choose(n=action)
-        self._total_earnings += reward
+        self._earnings.append(reward)
 
         # Update action values and counts
         self._action_values[action] = self.update_action_value(action=action, reward=reward)
@@ -54,7 +68,7 @@ class Player(object):
         max_index = random.choice(max_indices)
         return max_index
 
-    def select_greedy_optimal_action_with_randomness(self):
+    def select_greedy_optimal_action_with_exploration(self):
         """
         Select the action with the highest current action value but allow for occasional exploration
         :return:
@@ -102,5 +116,8 @@ class Player(object):
     def get_action_values(self):
         return self._action_values
 
-    def get_total_earnings(self):
-        return self._total_earnings
+    def get_earnings(self):
+        return self._earnings
+
+    def get_action_counts(self):
+        return self._action_k

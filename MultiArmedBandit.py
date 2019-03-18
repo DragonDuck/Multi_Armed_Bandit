@@ -11,8 +11,9 @@ class Bandit(object):
         self._params = kwargs
 
     def get_value(self):
-        return np.random.exponential(scale=self._params["scale"], size=1)[0]
+        # return np.random.exponential(scale=self._params["scale"], size=1)[0]
         # return np.random.normal(loc=self._params["loc"], scale=self._params["scale"], size=1)[0]
+        return np.random.binomial()
 
     def get_param(self, key):
         return self._params[key]
